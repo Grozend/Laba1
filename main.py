@@ -205,27 +205,6 @@ def delete_user(user_id, db: Session = Depends(get_db)):
     return user
 
 
-# Маршрут для обновления пользователя
-@app.put("/users/{user_id}", response_model=UserResponse)
-def update_user(user_id, user_update: UserUpdate, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if user_update.name:
-        user.name = user_update.name
-    if user_update.email:
-        user.email = user_update.email
-
-    try:
-        db.commit()
-        db.refresh(user)
-        return user
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-
 @app.get("/items/")
 async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
     return {"token": token}
